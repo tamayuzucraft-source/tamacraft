@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>市販素材カット設定DB</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#FAF7F0;--cream-dark:#EDE8DC;--teal:#5BBCB0;--teal-light:#B2E0DB;--teal-dark:#3D9E92;--green:#7BBF6A;--text:#3A4A3F;--text-light:#6B7C72;--white:#FFFFFF}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+header{background:linear-gradient(135deg,var(--teal) 0%,var(--teal-dark) 100%);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 3px 12px rgba(61,158,146,0.3);position:sticky;top:0;z-index:100}
+.header-left{display:flex;align-items:center;gap:10px}
+.logo{font-size:24px}
+header h1{color:white;font-size:16px;font-weight:700;line-height:1.3}
+header p{color:rgba(255,255,255,0.85);font-size:11px;margin-top:1px}
+.header-btns{display:flex;gap:8px}
+.hbtn{border-radius:20px;padding:7px 14px;font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;border:1.5px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.15);color:white}
+.hbtn:hover{background:rgba(255,255,255,0.3)}
+.hbtn-add{background:rgba(255,255,255,0.9);color:var(--teal-dark);border-color:transparent}
+.hbtn-add:hover{background:white}
+
+.stats-bar{background:var(--teal-light);padding:8px 20px;display:flex;gap:12px;font-size:12px;color:var(--teal-dark);font-weight:500;flex-wrap:wrap}
+
+.machine-toggle{display:flex;gap:0;background:var(--cream-dark);border-radius:12px;padding:4px;margin:14px 20px 0}
+.machine-btn{flex:1;padding:8px 4px;border:none;border-radius:9px;font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--text-light)}
+.machine-btn.active{background:var(--teal);color:white;box-shadow:0 2px 8px rgba(91,188,176,0.4)}
+
+.controls{padding:12px 20px 14px;display:flex;flex-direction:column;gap:10px}
+.search-wrap{position:relative}
+.search-wrap input{width:100%;padding:10px 16px 10px 40px;border:2px solid var(--teal-light);border-radius:24px;font-family:'Noto Sans JP',sans-serif;font-size:14px;background:var(--white);color:var(--text);outline:none;transition:border-color 0.2s}
+.search-wrap input:focus{border-color:var(--teal)}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+.filter-chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:5px 12px;border-radius:16px;border:2px solid var(--teal-light);background:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:11px;color:var(--text-light);cursor:pointer;transition:all 0.2s;font-weight:500;white-space:nowrap}
+.chip:hover,.chip.active{background:var(--teal);border-color:var(--teal);color:white}
+.blade-chip{padding:5px 12px;border-radius:16px;border:2px solid #D4A8E0;background:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#7A5A8A;cursor:pointer;transition:all 0.2s;font-weight:500;white-space:nowrap}
+.blade-chip:hover,.blade-chip.active{background:#9B6BB5;border-color:#9B6BB5;color:white}
+.sort-label{font-size:11px;color:var(--text-light);font-weight:600;white-space:nowrap}
+.sort-btn{padding:5px 12px;border-radius:16px;border:2px solid var(--teal-light);background:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:11px;color:var(--text-light);cursor:pointer;transition:all 0.2s;font-weight:500;white-space:nowrap}
+.sort-btn:hover{border-color:var(--teal);color:var(--teal)}
+.sort-btn.active{background:var(--teal-dark);border-color:var(--teal-dark);color:white}
+.sort-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.divider{height:1px;background:var(--cream-dark);margin:2px 0}
+.result-count{padding:0 20px 8px;font-size:12px;color:var(--text-light)}
+
+.cards{padding:0 16px 100px;display:flex;flex-direction:column;gap:10px}
+.card{background:var(--white);border-radius:14px;padding:14px 16px;box-shadow:0 2px 8px rgba(91,188,176,0.1);border-left:4px solid var(--teal-light);transition:box-shadow 0.2s,transform 0.15s}
+.card:hover{box-shadow:0 4px 16px rgba(91,188,176,0.2);transform:translateY(-1px)}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.card-names{flex:1}
+.card-name{font-size:13px;font-weight:700;color:var(--text);line-height:1.4}
+.card-official{font-size:11px;color:var(--text-light);margin-top:2px}
+.card-cat{font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;white-space:nowrap;flex-shrink:0}
+.card-specs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.spec{display:flex;flex-direction:column;background:var(--cream);border-radius:8px;padding:6px 10px;min-width:60px}
+.spec-label{font-size:9px;color:var(--text-light);font-weight:500;margin-bottom:2px}
+.spec-value{font-size:13px;font-weight:700;color:var(--teal-dark)}
+.level-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;margin-top:4px}
+.level-少ない{background:#A8D8B0;color:#2E6B45}
+.level-デフォルト{background:var(--teal);color:white}
+.level-詳細{background:#E07878;color:white}
+.card-memo{margin-top:6px;font-size:11px;color:var(--text-light);background:var(--cream);border-radius:8px;padding:6px 10px;line-height:1.5}
+.memo-label{font-size:9px;font-weight:600;color:var(--text-light);margin-bottom:2px}
+.card-actions{display:flex;gap:6px;margin-top:10px;justify-content:flex-end}
+.btn-edit{background:#E8F5F3;color:var(--teal-dark);border:1.5px solid var(--teal-light);border-radius:12px;padding:4px 14px;font-family:'Noto Sans JP',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.btn-edit:hover{background:var(--teal-light)}
+.btn-del{background:#FFF0EE;color:#C05050;border:1.5px solid #FFD0C8;border-radius:12px;padding:4px 14px;font-family:'Noto Sans JP',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.btn-del:hover{background:#FFD0C8}
+.empty{text-align:center;padding:60px 20px;color:var(--text-light);font-size:14px}
+.empty .emoji{font-size:40px;margin-bottom:12px}
+.fab{position:fixed;bottom:24px;right:20px;width:48px;height:48px;background:var(--teal);color:white;border:none;border-radius:50%;font-size:20px;cursor:pointer;box-shadow:0 4px 12px rgba(61,158,146,0.4);display:flex;align-items:center;justify-content:center;transition:transform 0.2s;z-index:50}
+.fab:hover{transform:scale(1.1)}
+
+/* Modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(58,74,63,0.45);backdrop-filter:blur(3px);z-index:200;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--cream);border-radius:20px 20px 0 0;padding:22px 20px 40px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.modal-title{font-size:16px;font-weight:700;color:var(--teal-dark);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-light)}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:11px;font-weight:700;color:var(--text-light);margin-bottom:5px}
+.form-group input,.form-group select,.form-group textarea{width:100%;border:2px solid var(--teal-light);border-radius:12px;padding:10px 14px;font-family:'Noto Sans JP',sans-serif;font-size:13px;color:var(--text);background:var(--white);outline:none;transition:border-color 0.2s;-webkit-appearance:none;appearance:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal)}
+.form-group textarea{resize:vertical;min-height:65px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.autofill-note{font-size:10px;color:var(--teal-dark);margin-top:4px;font-weight:500}
+.pressure-row{display:flex;gap:10px;align-items:flex-start}
+.pressure-row .form-group{flex:1}
+.pressure-auto{flex:1;background:var(--cream-dark);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--text-light);min-height:44px;display:flex;align-items:center}
+.pressure-auto.filled{color:var(--teal-dark);font-weight:700}
+.level-select{display:flex;gap:6px}
+.level-btn{flex:1;padding:9px 4px;border-radius:10px;border:2px solid var(--teal-light);background:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--text-light);transition:all 0.2s;text-align:center}
+.level-btn.sel-少ない{background:#A8D8B0;border-color:#A8D8B0;color:#2E6B45}
+.level-btn.sel-デフォルト{background:var(--teal);border-color:var(--teal);color:white}
+.level-btn.sel-詳細{background:#E07878;border-color:#E07878;color:white}
+.modal-actions{display:flex;gap:10px;margin-top:18px}
+.btn-save{flex:1;background:var(--teal);color:white;border:none;border-radius:14px;padding:13px;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background 0.2s}
+.btn-save:hover{background:var(--teal-dark)}
+.btn-cancel-modal{background:var(--cream-dark);color:var(--text-light);border:none;border-radius:14px;padding:13px 18px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
+.section-label{font-size:10px;font-weight:700;color:var(--teal-dark);margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--teal-light)}
+.notif{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--teal-dark);color:white;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all 0.3s;pointer-events:none;z-index:300;white-space:nowrap}
+.notif.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.mat-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;margin-top:4px}
+.mat-lite{background:#b8e8f8;color:#0a5a8a}
+.mat-standard{background:#c8eaaa;color:#2a5e10}
+.mat-fabric{background:#ffc0d0;color:#900040}
+.mat-strong{background:#ddc8f0;color:#4a1880}
+.mat-other{background:#eee;color:#555}
+/* 公式プルダウン カテゴリ文字色 */
+select optgroup[label="アートボード"]{color:#3a7a45}
+select optgroup[label="アイロン接着タイプ"]{color:#2a8a80}
+select optgroup[label="カードストック"]{color:#3a7a45}
+select optgroup[label="ビニール"]{color:#1a7a9a}
+select optgroup[label="プラスチック"]{color:#7a3a9a}
+select optgroup[label="ホイル・金属"]{color:#2a5a8a}
+select optgroup[label="布"]{color:#9a3a2a}
+select optgroup[label="紙"]{color:#4a7a1a}
+select optgroup[label="フェルト"]{color:#9a5a2a}
+select optgroup[label="フォーム"]{color:#9a1a8a}
+select optgroup[label="革"]{color:#7a5a1a}
+select optgroup[label="木材"]{color:#6a4a1a}
+select optgroup[label="その他"]{color:#8a6a1a}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div>
+      <h1>市販素材カット設定DB</h1>
+      <p>by tama._.craft</p>
+    </div>
+  </div>
+  <div class="header-btns">
+    <button class="hbtn" onclick="exportCSV()">📥 CSV</button>
+    <button class="hbtn hbtn-add" onclick="openModal()">＋ 追加</button>
+  </div>
+</header>
+
+<div class="stats-bar" id="statsBar"></div>
+
+<div class="machine-toggle">
+  <button class="machine-btn active" onclick="setMachine('Joy')">🟦 Joy</button>
+  <button class="machine-btn" onclick="setMachine('Explorer3')">🟧 Explorer 3</button>
+  <button class="machine-btn" onclick="setMachine('Maker3')">🟩 Maker 3</button>
+  <button class="machine-btn" onclick="setMachine('all')">📋 全て</button>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="search" id="search" placeholder="素材名・公式素材名・メモで検索…" oninput="render()">
+  </div>
+  <div class="filter-chips" id="chips"></div>
+  <div class="divider"></div>
+  <div class="sort-row">
+    <span class="sort-label">🔪 ブレード：</span>
+    <div id="blade-chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+  </div>
+  <div class="sort-row">
+    <span class="sort-label">📏 厚みソート：</span>
+    <button class="sort-btn active" id="sort-none" onclick="setSort('none')">登録順</button>
+    <button class="sort-btn" id="sort-thick-asc" onclick="setSort('thick-asc')">↑ 薄い順</button>
+    <button class="sort-btn" id="sort-thick-desc" onclick="setSort('thick-desc')">↓ 厚い順</button>
+  </div>
+  <div class="sort-row" style="align-items:center;gap:8px">
+    <span class="sort-label">📏 厚み範囲：</span>
+    <input type="number" id="thick-min" placeholder="以上(mm)" step="0.1" min="0"
+      style="width:90px;padding:5px 8px;border:1.5px solid var(--teal-light);border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-size:12px;outline:none"
+      oninput="render()">
+    <span style="font-size:12px;color:var(--text-light)">〜</span>
+    <input type="number" id="thick-max" placeholder="以下(mm)" step="0.1" min="0"
+      style="width:90px;padding:5px 8px;border:1.5px solid var(--teal-light);border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-size:12px;outline:none"
+      oninput="render()">
+    <button onclick="clearThick()" style="padding:5px 10px;border:1.5px solid var(--border,#ddd);border-radius:8px;background:#fff;font-size:11px;cursor:pointer;color:var(--text-light);font-family:'Noto Sans JP',sans-serif">クリア</button>
+  </div>
+</div>
+
+<div class="result-count" id="result-count"></div>
+<div class="cards" id="cards"></div>
+<button class="fab" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" onclick="closeOut(event)">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modalTitle">✏️ カット設定を追加</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="section-label">📦 素材情報</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>マシン *</label>
+        <select id="f_machine" onchange="onMachineChange()">
+          <option value="">選択してください</option>
+          <option value="Joy">Joy</option>
+          <option value="Explorer3">Explorer 3</option>
+          <option value="Maker3">Maker 3</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>カテゴリ *</label>
+        <select id="f_category">
+          <option value="">選択してください</option>
+          <option>アートボード</option><option>アイロン接着タイプ</option>
+          <option>カードストック</option><option>ビニール</option>
+          <option>プラスチック</option><option>ホイル・金属</option>
+          <option>布</option><option>紙</option><option>フェルト</option>
+          <option>フォーム</option><option>革</option><option>木材</option>
+          <option>その他</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>市販素材名 * （例：ダイソー グリッターシート、セリア フェルト）</label>
+      <input type="text" id="f_name" placeholder="例：ダイソー ラメ入りビニールシール">
+    </div>
+
+    <div class="section-label">🔗 公式素材との紐付け</div>
+    <div class="form-group">
+      <label>公式類似素材（マシンを選ぶとリストが絞り込まれます）</label>
+      <select id="f_official" onchange="onOfficialChange()">
+        <option value="">— まずマシンを選択してください —</option>
+      </select>
+      <div class="autofill-note" id="autofill-note" style="display:none">✨ カット圧・ブレードを自動入力しました。必要に応じて下で修正できます。</div>
+    </div>
+
+    <div class="section-label">⚙️ カット設定</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>公式圧力（自動入力）</label>
+        <div class="pressure-auto" id="official_pressure">—</div>
+      </div>
+      <div class="form-group">
+        <label>マイ圧力（手入力・上書き可）</label>
+        <input type="number" id="f_pressure" placeholder="例：139">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>素材の厚み（mm）</label>
+        <input type="number" id="f_thickness" placeholder="例：0.5" step="0.1" min="0">
+      </div>
+      <div class="form-group">
+        <label>ブレード（公式素材選択で自動入力）</label>
+        <select id="f_blade" disabled style="opacity:0.7;cursor:not-allowed">
+          <option value="">公式素材を選択すると自動入力</option>
+          <option>ファインポイントブレード</option>
+          <option>ディープポイントブレード</option>
+          <option>ボンデッドファブリックブレード</option>
+          <option>ロータリーブレード</option>
+          <option>スコアリングホイール</option>
+          <option>ナイフブレード</option>
+          <option>その他</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>使用マット（手動選択）</label>
+        <select id="f_mat">
+          <option value="">選択</option>
+          <option value="LightGrip（水色）">LightGrip（水色）</option>
+          <option value="StandardGrip（緑）">StandardGrip（緑）</option>
+          <option value="FabricGrip（ピンク）">FabricGrip（ピンク）</option>
+          <option value="StrongGrip（紫）">StrongGrip（紫）</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>圧力レベル</label>
+        <div class="level-select" id="levelBtns">
+          <button class="level-btn" data-val="少ない" onclick="selectLevel('少ない')">少ない</button>
+          <button class="level-btn" data-val="デフォルト" onclick="selectLevel('デフォルト')">デフォルト</button>
+          <button class="level-btn" data-val="詳細" onclick="selectLevel('詳細')">詳細</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>💬 メモ・コツ</label>
+      <textarea id="f_memo" placeholder="例：ミラー設定必須、転写シート使用、2回カット推奨など"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel-modal" onclick="closeModal()">キャンセル</button>
+      <button class="btn-save" onclick="saveEntry()">💾 保存する</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ===== 公式データ（597件） =====
+const OFFICIAL_DATA = [{"machine": "Joy", "category": "アートボード", "name": "フラット段ボール / Flat Cardboard", "pressure": "226", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アートボード", "name": "箔ポスターボード / Foil Poster Board", "pressure": "257", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アートボード", "name": "段ボール / Corrugated Cardboard", "pressure": "286", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "Smart Iron-On -パターン付き / Smart Iron-On - Patterned", "pressure": "90", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "Everyday Iron-On / Everyday Iron-On", "pressure": "95", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "お得なアイロン接着タイプ / Value Iron-On", "pressure": "95", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "アイロン接着タイプ / Iron-On", "pressure": "95", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "ホイルアイロン接着 / Foil Iron-On", "pressure": "100", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "パフアイロン接着 / Puff Iron-On", "pressure": "110", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "UV活性化で色が変化するアイロン接着タイプ / UV Activated Color Changing Iron-On", "pressure": "113", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "反射アイロン接着タイプ / Reflective Iron-On", "pressure": "113", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "Smart Iron-On / Smart Iron-On Matless Heat Transfer Vinyl", "pressure": "118", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "フロックアイロン接着 / Flocked Iron-On", "pressure": "120", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "SportFlexアイロン接着 / SportFlex Iron-On", "pressure": "120", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "Everyday Iron-Onメッシュ / Everyday Iron-On Mesh", "pressure": "120", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "暗闇で光るアイロン接着タイプ / Glow in the Dark Iron-On", "pressure": "130", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "ホログラフィックアイロン接着 / Holographic Iron-On", "pressure": "135", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "Smart Iron-On -ホログラフィック / Smart Iron-On Holographic Matless Heat Transfer Vinyl", "pressure": "135", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "3Dアイロン接着 / 3D Iron-On", "pressure": "140", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "Smart Iron-On - グリッター / Smart Iron-On Glitter Matless Heat Transfer Vinyl", "pressure": "147", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "Everyday Iron-Onモザイク / Everyday Iron-On Mosaic", "pressure": "158", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "グリッターアイロン接着 / Glitter Iron-On", "pressure": "180", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "グリッターメッシュアイロン接着タイプ / Glitter Mesh Iron-On", "pressure": "180", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "ホログラフィックスパークルアイロン接着 / Holographic Sparkle Iron-On", "pressure": "182", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "お得なグリッターアイロン接着 / Value Glitter Iron-On", "pressure": "200", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "カラーポップアイロン接着 / Color Pop Iron-On", "pressure": "230", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "インフュージブルインク転写シート / Infusible Ink Transfer Sheet", "pressure": "241", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "アイロン接着タイプ", "name": "ホログラフィックアイロン接着モザイク / Holographic Iron-On Mosaic", "pressure": "246", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "カードストック", "name": "インサートカード - カードストック / Insert Card - Cardstock", "pressure": "150", "multicut": "2x", "blade": "-", "products": []}, {"machine": "Joy", "category": "カードストック", "name": "ヘビーカードストック - 100ポンド（270gsm） / Heavy Cardstock - 100 lb (270 gsm)", "pressure": "223", "multicut": "3x", "blade": "-", "products": []}, {"machine": "Joy", "category": "カードストック", "name": "ライトカードストック - 65ポンド（176gsm） / Light Cardstock - 65 lb (176 gsm)", "pressure": "245", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "カードストック", "name": "グリッターカードストック / Glitter Cardstock", "pressure": "245", "multicut": "2x", "blade": "-", "products": []}, {"machine": "Joy", "category": "カードストック", "name": "デラックスペーパー、粘着バック / Deluxe Paper, Adhesive Backed", "pressure": "253", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "カードストック", "name": "デラックスペーパー、エンボスホイル / Deluxe Paper Foil Embossed", "pressure": "257", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "カードストック", "name": "お得なカードストック - 65 lb（176 g） / Value Cardstock - 65 lb (176gsm)", "pressure": "265", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "カードストック", "name": "デラックスペーパー / Deluxe Paper", "pressure": "270", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "カードストック", "name": "ミディアムカードストック - 80ポンド（216gsm） / Medium Cardstock - 80 lb (216 gsm)", "pressure": "275", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "カードストック", "name": "Smart Paper、ステッカーカードストック / Smart Paper Matless Sticker Cardstock", "pressure": "285", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "カードストック", "name": "カットアウェイカード / Cutaway Card + Backer", "pressure": "315", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "その他", "name": "ウィンドウクリング / Window Cling", "pressure": "120", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "自由自在の原紙フイルム / Flexible Stencil Film", "pressure": "100", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "使いやすい原紙 / Smart Stencil Matless Flexible Stencil Film", "pressure": "110", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Smart Vinyl - ホログラフィックパターン / Smart Vinyl - Holographic Patterns", "pressure": "111", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Smart Vinyl - 取り外し可能 / Smart Vinyl Matless Removable Vinyl", "pressure": "115", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl - ホログラフィックアールデコ / Premium Vinyl - Holographic Art Deco", "pressure": "121", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl - ホログラフィッククリスタル / Premium Vinyl - Holographic Crystals", "pressure": "121", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl - ホログラフィックバブル / Premium Vinyl - Holographic Bubbles", "pressure": "121", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl -ホログラフィックスレッド / Premium Vinyl - Holographic Threads", "pressure": "121", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "ホログラフィックスパークルビニール / Premium Vinyl - Holographic Sparkle", "pressure": "121", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "粘着箔 / Adhesive Foil", "pressure": "121", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl - テクスチャード / Premium Vinyl - Textured", "pressure": "123", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl -ホログラフィック3Dテクスチャ / Premium Vinyl - Holographic 3D Texture", "pressure": "123", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl - モザイク / Premium Vinyl - Mosaic", "pressure": "124", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl -トゥルーブラッシュ / Premium Vinyl - True Brushed", "pressure": "124", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Smart Vinyl - 恒久 / Smart Vinyl Matless Permanent Vinyl", "pressure": "125", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl -フロストグレー / Premium Vinyl - Frosted Gray", "pressure": "126", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "ステンシルビニール / Stencil Vinyl", "pressure": "127", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "ドライイレースビニール / Dry Erase Vinyl", "pressure": "131", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl - テクスチャードメタリック / Premium Vinyl - Textured Metallic", "pressure": "132", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Smart Vinyl - シマー / Smart Vinyl Shimmer Matless Permanent Vinyl", "pressure": "135", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "ホログラフィックビニール / Holographic Vinyl", "pressure": "137", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl / Premium Vinyl", "pressure": "139", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "お得なビニール / Value Vinyl", "pressure": "139", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl - シマー / Premium Vinyl - Shimmer", "pressure": "140", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Smart Label書き込み可能ビニール / Smart Label Matless Writable Vinyl", "pressure": "150", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl - フロスト不透明 / Premium Vinyl - Frosted Opaque", "pressure": "151", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "熱や冷感活性化で色が変化するビニール / Heat/Cold Activated Color Changing Vinyl", "pressure": "152", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Smart Vinyl - マットメタリック / Smart Vinyl Matte Metallic Matless Permanent Vinyl", "pressure": "155", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl - パール / Premium Vinyl - Pearl", "pressure": "158", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "Premium Vinyl - フロストグリッター / Premium Vinyl - Frosted Glitter", "pressure": "158", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "暗闇で光るビニール / Glow in the Dark Vinyl", "pressure": "160", "multicut": "2x", "blade": "-", "products": []}, {"machine": "Joy", "category": "ビニール", "name": "チョークボードビニール / Chalkboard Vinyl", "pressure": "206", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "プラスチック", "name": "アセテート / Acetate", "pressure": "280", "multicut": "2x", "blade": "-", "products": []}, {"machine": "Joy", "category": "プラスチック", "name": "ホイルアセテート / Foil Acetate", "pressure": "330", "multicut": "2x", "blade": "-", "products": []}, {"machine": "Joy", "category": "ホイル・金属", "name": "パーティーホイル / Party Foil", "pressure": "269", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "紙", "name": "スマート水溶性ラベル / Smart Label Dissolvable Matless Writable Paper", "pressure": "80", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "紙", "name": "レーザーコピーペーパー / Laser Copy Paper", "pressure": "100", "multicut": "2x", "blade": "-", "products": []}, {"machine": "Joy", "category": "紙", "name": "Smart Label書き込み可能ペーパー / Smart Label Matless Writable Paper", "pressure": "107", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "紙", "name": "パールペーパー / Pearl Paper", "pressure": "120", "multicut": "2x", "blade": "-", "products": []}, {"machine": "Joy", "category": "紙", "name": "フォトペーパー / Photo Paper", "pressure": "223", "multicut": "2x", "blade": "-", "products": []}, {"machine": "Joy", "category": "紙", "name": "ウォーターカラーカード / Watercolor Cards", "pressure": "230", "multicut": "2x", "blade": "-", "products": []}, {"machine": "Joy", "category": "紙", "name": "スパークルペーパー / Sparkle Paper", "pressure": "271", "multicut": "2x", "blade": "-", "products": []}, {"machine": "Joy", "category": "紙", "name": "シマーペーパー / Shimmer Paper", "pressure": "306", "multicut": "2x", "blade": "-", "products": []}, {"machine": "Joy", "category": "紙", "name": "ホイルペーパー - 0.36mm / Foil Paper - 0.36 mm", "pressure": "318", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "紙", "name": "トゥルーブラッシュペーパー / True Brushed Paper", "pressure": "328", "multicut": "2x", "blade": "-", "products": []}, {"machine": "Joy", "category": "布", "name": "合成スエード / Faux Suede", "pressure": "220", "multicut": "Off", "blade": "-", "products": []}, {"machine": "Joy", "category": "布", "name": "フェイクレザー（超薄） / Faux Leather (Paper Thin)", "pressure": "251", "multicut": "2x", "blade": "-", "products": []}, {"machine": "Explorer3", "category": "アートボード", "name": "段ボール Corrugated Cardboard", "pressure": "315", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アートボード", "name": "フラット段ボール Flat Cardboard", "pressure": "300", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アートボード", "name": "ホログラフィックのホイルクラフトボード Foil Kraft Board  - Holographic", "pressure": "340", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アートボード", "name": "箔ポスターボード Foil Poster Board", "pressure": "340", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アートボード", "name": "クラフトボード Kraft Board", "pressure": "320", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アートボード", "name": "ライトチップボード - 0.37mm Light Chipboard - 0.37 mm", "pressure": "327", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アートボード", "name": "マットボード（1.5mm） Matboard (1.5 mm)", "pressure": "350", "multicut": "5x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アートボード", "name": "メタリックポスターボード Metallic Poster Board", "pressure": "330", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アートボード", "name": "ポスターボード Poster Board", "pressure": "287", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "3Dアイロン接着 3D Iron-On", "pressure": "190", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "カラーポップアイロン接着 Color Pop Iron-On", "pressure": "250", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "Everyday Iron-On Everyday Iron-On", "pressure": "113", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "Everyday Iron-Onメッシュ Everyday Iron-On Mesh", "pressure": "100", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "Everyday Iron-Onモザイク Everyday Iron-On Mosaic", "pressure": "248", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "Express Iron-On Express Iron-On", "pressure": "102", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "フロックアイロン接着 Flocked Iron-On", "pressure": "140", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "ホイルアイロン接着 Foil Iron-On", "pressure": "123", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "グリッターアイロン接着 Glitter Iron-On", "pressure": "177", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "グリッターメッシュアイロン接着タイプ Glitter Mesh Iron-On", "pressure": "154", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "暗闇で光るアイロン接着タイプ Glow in the Dark Iron-On", "pressure": "130", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "ホログラフィックアイロン接着 Holographic Iron-On", "pressure": "154", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "ホログラフィックアイロン接着モザイク Holographic Iron-On Mosaic", "pressure": "268", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "ホログラフィックスパークルアイロン接着 Holographic Sparkle Iron-On", "pressure": "174", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "ホログラフィックスパークルアイロン接着モザイク Holographic Sparkle Iron-On Mosaic", "pressure": "252", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "インフュージブルインク転写シート Infusible Ink Transfer Sheet", "pressure": "226", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "アイロン接着タイプ Iron-On", "pressure": "113", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "アイロン接着パッチ Iron-On Patches", "pressure": "180", "multicut": "3x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "メタリックアイロン接着モザイク Metallic Iron-On Mosaic", "pressure": "267", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "パターンアイロン接着 Patterned Iron-On", "pressure": "80", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "印刷可能なアイロン接着、ダーク Printable Iron-On, Dark", "pressure": "100", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "印刷可能なアイロン接着タイプ、ライト Printable Iron-On, Light", "pressure": "70", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "昇華転写対応・印刷可能ビニールアイロン接着 Printable Iron-On, Sublimation", "pressure": "100", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "パフアイロン接着 Puff Iron-On", "pressure": "130", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "反射アイロン接着タイプ Reflective Iron-On", "pressure": "113", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "Smart Iron-On - グリッター Smart Iron-On Glitter Matless Heat Transfer Vinyl", "pressure": "163", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "Smart Iron-On -ホログラフィック Smart Iron-On Holographic Matless Heat Transfer Vinyl", "pressure": "156", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "Smart Iron-On Smart Iron-On Matless Heat Transfer Vinyl", "pressure": "156", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "SportFlexアイロン接着 SportFlex Iron-On", "pressure": "133", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "UV活性化で色が変化するアイロン接着タイプ UV Activated Color Changing Iron-On", "pressure": "113", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "お得なグリッターアイロン接着 Value Glitter Iron-On", "pressure": "200", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "アイロン接着タイプ", "name": "お得なアイロン接着タイプ Value Iron-On", "pressure": "113", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "カードストック、接着剤付き Cardstock, Adhesive-Backed", "pressure": "300", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "カットアウェイカード + バッカー Cutaway Card + Backer", "pressure": "180", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "デラックスペーパー Deluxe Paper", "pressure": "270", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "デラックスペーパー、エンボスホイル Deluxe Paper Foil Embossed", "pressure": "300", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "デラックスペーパー、粘着バック Deluxe Paper, Adhesive Backed", "pressure": "270", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "グリッターカードストック Glitter Cardstock", "pressure": "270", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "ヘビーカードストック - 100ポンド（270gsm） Heavy Cardstock - 100 lb (270 gsm)", "pressure": "295", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "パターン厚紙 Heavy Patterned Paper", "pressure": "275", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "カードを挿入-カードストック Insert Card - Cardstock", "pressure": "275", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "クラフトカードストック Kraft Cardstock", "pressure": "275", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "ライトカードストック - 65ポンド（176gsm） Light Cardstock - 65 lb (176 gsm)", "pressure": "214", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "ミディアムカードストック - 80ポンド（216gsm） Medium Cardstock - 80 lb (216 gsm)", "pressure": "320", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "カードストック（複雑なカット用） Medium Cardstock - 80 lb (Intricate Cuts, 2x Pass)", "pressure": "200", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "Smart Paper、ステッカーカードストック Smart Paper Matless Sticker Cardstock", "pressure": "300", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "カードストック", "name": "お得なカードストック - 65 lb（176 g） Value Cardstock - 65 lb (176gsm)", "pressure": "240", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "粘着箔 Adhesive Foil", "pressure": "108", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "粘着ホイル、マット Adhesive Foil, Matte", "pressure": "170", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "チョークボードビニール Chalkboard Vinyl", "pressure": "190", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "自由自在の原紙フイルム Flexible Stencil Film", "pressure": "110", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "グリッタービニール Glitter Vinyl", "pressure": "76", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "暗闇で光るビニール Glow in the Dark Vinyl", "pressure": "160", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "熱や冷感活性化で色が変化するビニール Heat/Cold Activated Color Changing Vinyl", "pressure": "156", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "ホログラフィックビニール Holographic Vinyl", "pressure": "110", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "プレミアム屋外用ビニール Premium Outdoor Vinyl", "pressure": "118", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl - フロストグリッター Premium Vinyl - Frosted Glitter", "pressure": "148", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl -フロストグレー Premium Vinyl - Frosted Gray", "pressure": "131", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl - フロスト不透明 Premium Vinyl - Frosted Opaque", "pressure": "115", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl -ホログラフィック3Dテクスチャ Premium Vinyl - Holographic 3D Texture", "pressure": "108", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl - ホログラフィックアールデコ Premium Vinyl - Holographic Art Deco", "pressure": "138", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl - ホログラフィックバブル Premium Vinyl - Holographic Bubbles", "pressure": "128", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl - ホログラフィッククリスタル Premium Vinyl - Holographic Crystals", "pressure": "160", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "ホログラフィックローズバブルのプレミアムビニール Premium Vinyl - Holographic Rose Bubble", "pressure": "115", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "ホログラフィックスパークルビニール Premium Vinyl - Holographic Sparkle", "pressure": "139", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl -ホログラフィックスレッド Premium Vinyl - Holographic Threads", "pressure": "138", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl - モザイク Premium Vinyl - Mosaic", "pressure": "136", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl - パール Premium Vinyl - Pearl", "pressure": "146", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl - 恒久的光沢 Premium Vinyl - Permanent", "pressure": "115", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl - 取り外し可能なマット Premium Vinyl - Removable", "pressure": "121", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl - シマー Premium Vinyl - Shimmer", "pressure": "148", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl - テクスチャード Premium Vinyl - Textured", "pressure": "166", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl - テクスチャードメタリック Premium Vinyl - Textured Metallic", "pressure": "166", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Premium Vinyl -トゥルーブラッシュ Premium Vinyl - True Brushed", "pressure": "140", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "印刷可能なビニール、特殊 Printable Vinyl, Specialty (Gold/Silver)", "pressure": "160", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "印刷可能なビニール、透明 Printable Vinyl, Transparent", "pressure": "110", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "印刷可能なビニール Printable Vinyl, White (Gray Liner Printing)", "pressure": "120", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "印刷可能なビニール、ホワイト（グリーンライナー印刷） Printable Vinyl, White (Green Liner Printing)", "pressure": "70", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "印刷可能な防水ステッカーセット - 透明 Printable Waterproof Sticker Set - Transparent", "pressure": "245", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "印刷可能な防水ステッカーセット - 透明ホログラフィック Printable Waterproof Sticker Set - Transparent Holographic", "pressure": "250", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "印刷可能な防水ステッカーセット - ホワイト Printable Waterproof Sticker Set - White", "pressure": "220", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "印刷可能な防水ステッカーセット - ホワイトホログラフィック Printable Waterproof Sticker Set - White Holographic", "pressure": "200", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Smart Label書き込み可能ビニール Smart Label Matless Writable Vinyl", "pressure": "155", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "使いやすい原紙 Smart Stencil Matless Flexible Stencil Film", "pressure": "110", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Smart Vinyl - 恒久 Smart Vinyl Matless Permanent Vinyl", "pressure": "123", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Smart Vinyl - 取り外し可能 Smart Vinyl Matless Removable Vinyl", "pressure": "108", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Smart Vinyl - マットメタリック Smart Vinyl Matte Metallic Matless Permanent Vinyl", "pressure": "154", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "Smart Vinyl - シマー Smart Vinyl Shimmer Matless Permanent Vinyl", "pressure": "169", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "ステンシルフィルム - 0.4mm Stencil Film - 0.4 mm", "pressure": "300", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "ステンシルビニール Stencil Vinyl", "pressure": "109", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ビニール", "name": "お得なビニール Value Vinyl", "pressure": "115", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "フェルト", "name": "フェルト、接着剤付きウール Felt, Wool Bonded", "pressure": "331", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "フェルト", "name": "フェルト、ウール布 Felt, Wool Fabric", "pressure": "328", "multicut": "6x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "フォーム", "name": "クラフトフォーム Craft Foam", "pressure": "180", "multicut": "1x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Explorer3", "category": "フォーム", "name": "EVAフォーム EVA foam", "pressure": "145", "multicut": "1x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Explorer3", "category": "フォーム", "name": "グリッタークラフトフォーム Glitter Craft Foam", "pressure": "180", "multicut": "1x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Explorer3", "category": "プラスチック", "name": "アセテート Acetate", "pressure": "280", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "プラスチック", "name": "カッティングマットプロテクター Cutting Mat Protector", "pressure": "310", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "プラスチック", "name": "ホイルアセテート Foil Acetate", "pressure": "321", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "プラスチック", "name": "マイラー Mylar", "pressure": "292", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "プラスチック", "name": "透明シート Transparency", "pressure": "308", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ホイル・金属", "name": "アルミホイル Aluminum Foil", "pressure": "80", "multicut": "2x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Explorer3", "category": "ホイル・金属", "name": "パーティーホイル Party Foil", "pressure": "275", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "ブッチャーペーパー Butcher Paper", "pressure": "80", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "調整用紙 Calibration Paper", "pressure": "192", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "工作用紙 Construction Paper", "pressure": "155", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "コピーペーパー - 20ポンド（75gsm） Copy Paper", "pressure": "143", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "コピーペーパー - 24ポンド（90gsm） Copy Paper - 24 lb (90 gsm)", "pressure": "143", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "コピーペーパー - 32ポンド（120gsm） Copy Paper - 32 lb (120 gsm)", "pressure": "143", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "フロックペーパー Flocked Paper", "pressure": "225", "multicut": "3x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "ホイルペーパー - 0.36mm Foil Paper - 0.36 mm", "pressure": "300", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "買い物バッグ Grocery Bag", "pressure": "200", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "140 Ib（300 g ）の厚い水彩紙 Heavy Watercolor Paper - 140 lbs (300 gsm)", "pressure": "310", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "レーザーコピーペーパー Laser Copy Paper", "pressure": "126", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "ライトパターンペーパー Light Patterned Paper", "pressure": "240", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "ノートブックペーパー Notebook Paper", "pressure": "191", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "パーチメントペーパー Parchment Paper", "pressure": "100", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "パールペーパー Pearl Paper", "pressure": "138", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "フォトペーパー Photo Paper - 48 lb", "pressure": "223", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "印刷可能なステッカーペーパー（クリア） Printable Sticker Paper, Clear (No Liner Printing)", "pressure": "230", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "印刷可能なステッカー用紙、ホワイト（グリーンライナー印刷） Printable Sticker Paper, White", "pressure": "105", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "印刷可能なステッカーペーパー（ホワイト） Printable Sticker Paper, White (Gray Liner Printing)", "pressure": "230", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "印刷可能な一時的なタトゥーペーパー Printable Temporary Tattoo Paper", "pressure": "350", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "シマーペーパー Shimmer Paper", "pressure": "345", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "スマート水溶性ラベル Smart Label Dissolvable Matless Writable Paper", "pressure": "80", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "滑らかなグリッターペーパー Smooth Glitter Paper", "pressure": "175", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "スパークルペーパー Sparkle Paper", "pressure": "285", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "付箋 Sticky Note", "pressure": "175", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "昇華転写紙 Sublimation Paper", "pressure": "130", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "トゥルーブラッシュペーパー True Brushed Paper", "pressure": "295", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "ベラム Vellum", "pressure": "200", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "ウォーターカラーカード Watercolor Cards", "pressure": "230", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "ワックスペーパー Wax Paper", "pressure": "160", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "紙", "name": "ラッピングペーパー Wrapping Paper", "pressure": "100", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "その他", "name": "ダクトテープシート Duct Tape Sheet", "pressure": "122", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "その他", "name": "マグネットシート - 0.5mm Magnetic Sheet - 0.5 mm", "pressure": "300", "multicut": "5x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Explorer3", "category": "その他", "name": "マグネットシート - 1.0mm Magnetic Sheet - 1.0 mm", "pressure": "350", "multicut": "8x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Explorer3", "category": "その他", "name": "ペイントチップ Paint Chip", "pressure": "310", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "その他", "name": "印刷可能なマグネットシート Printable Magnetic Sheet", "pressure": "330", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "その他", "name": "和紙シート Washi Sheet", "pressure": "85", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "その他", "name": "和紙テープ - 0.06mm Washi Tape - 0.06 mm", "pressure": "70", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "その他", "name": "ウィンドウクリング Window Cling", "pressure": "100", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "革", "name": "純正レザー Genuine Leather", "pressure": "255", "multicut": "2x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Explorer3", "category": "革", "name": "メタリックレザー Metallic Leather", "pressure": "255", "multicut": "4x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Explorer3", "category": "革", "name": "シマーレザー - 1mm Shimmer Leather - 1 mm", "pressure": "325", "multicut": "3x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "布", "name": "デニム、接着剤付き Denim, Bonded", "pressure": "321", "multicut": "3x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "布", "name": "フェイクレザー（超薄） Faux Leather (Paper Thin)", "pressure": "215", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "布", "name": "合成スエード Faux Suede", "pressure": "250", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "布", "name": "フュージブル布 Fusible Fabric", "pressure": "220", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "布", "name": "オイルクロス、接着剤付き Oil Cloth, Bonded", "pressure": "285", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "布", "name": "ポリエステル、接着剤付き Polyester, Bonded", "pressure": "285", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "布", "name": "印刷可能な布 Printable Fabric", "pressure": "205", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "布", "name": "シルク、接着剤付き Silk, Bonded", "pressure": "285", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Explorer3", "category": "木材", "name": "ナチュラルウッドベニヤ naturalwood", "pressure": "320", "multicut": "3x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "アートボード", "name": "アート／イラストボードArt/Illustration Board", "pressure": "750", "multicut": "17x", "blade": "ナイフブレード", "products": []}, {"machine": "Maker3", "category": "アートボード", "name": "チップボード（1.5mm）Chipboard (1.5 mm)", "pressure": "500", "multicut": "12x", "blade": "ナイフブレード", "products": []}, {"machine": "Maker3", "category": "アートボード", "name": "段ボールCorrugated Cardboard", "pressure": "315", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アートボード", "name": "フラット段ボールFlat Cardboard", "pressure": "300", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アートボード", "name": "ホログラフィックのホイルクラフトボードFoil Kraft Board  - Holographic", "pressure": "340", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アートボード", "name": "箔ポスターボードFoil Poster Board", "pressure": "330", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アートボード", "name": "ヘビーチップボード - 2.0mmHeavy Chipboard - 2.0 mm", "pressure": "650", "multicut": "24x", "blade": "ナイフブレード", "products": []}, {"machine": "Maker3", "category": "アートボード", "name": "クラフトボードKraft Board", "pressure": "325", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アートボード", "name": "ライトチップボード - 0.37mmLight Chipboard - 0.37 mm", "pressure": "327", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アートボード", "name": "マットボード（1.5mm）Matboard (1.5 mm)", "pressure": "350", "multicut": "6x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "アートボード", "name": "メタリックポスターボードMetallic Poster Board", "pressure": "330", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アートボード", "name": "ポスターボードPoster Board", "pressure": "287", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "3Dアイロン接着3D Iron-On", "pressure": "190", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "カラーポップアイロン接着Color Pop Iron-On", "pressure": "250", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "Everyday Iron-OnEveryday Iron-On", "pressure": "113", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "Everyday Iron-OnメッシュEveryday Iron-On Mesh", "pressure": "100", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "Everyday Iron-OnモザイクEveryday Iron-On Mosaic", "pressure": "248", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "Express Iron-OnExpress Iron-On", "pressure": "102", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "フロックアイロン接着Flocked Iron-On", "pressure": "140", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "ホイルアイロン接着Foil Iron-On", "pressure": "123", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "グリッターアイロン接着Glitter Iron-On", "pressure": "167", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "グリッターメッシュアイロン接着タイプGlitter Mesh Iron-On", "pressure": "154", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "暗闇で光るアイロン接着タイプGlow in the Dark Iron-On", "pressure": "130", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "熱転写（Cricut非正規品）Heat Transfer (non-Cricut)", "pressure": "113", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "ホログラフィック熱転写Holographic Heat Transfer", "pressure": "153", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "ホログラフィックアイロン接着Holographic Iron-On", "pressure": "153", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "ホログラフィックアイロン接着モザイクHolographic Iron-On Mosaic", "pressure": "268", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "ホログラフィックスパークルアイロン接着Holographic Sparkle Iron-On", "pressure": "174", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "ホログラフィックスパークルアイロン接着モザイクHolographic Sparkle Iron-On Mosaic", "pressure": "252", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "インフュージブルインク転写シートInfusible Ink Transfer Sheet", "pressure": "226", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "アイロン接着タイプIron-On", "pressure": "113", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "メタリックアイロン接着モザイクMetallic Iron-On Mosaic", "pressure": "267", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "メタリックパフアイロン接着Metallic Puff Iron-On", "pressure": "175", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "パターンアイロン接着Patterned Iron-On", "pressure": "80", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "印刷可能なアイロン接着、ダークPrintable Iron-On, Dark", "pressure": "100", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "印刷可能なアイロン接着タイプ、ライトPrintable Iron-On, Light", "pressure": "80", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "昇華転写対応・印刷可能ビニールアイロン接着Printable Iron-On, Sublimation", "pressure": "100", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "パフアイロン接着Puff Iron-On", "pressure": "130", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "反射アイロン接着タイプReflective Iron-On", "pressure": "113", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "Smart Iron-On - グリッターSmart Iron-On Glitter Matless Heat Transfer Vinyl", "pressure": "163", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "Smart Iron-On -ホログラフィックSmart Iron-On Holographic Matless Heat Transfer Vinyl", "pressure": "156", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "Smart Iron-OnSmart Iron-On Matless Heat Transfer Vinyl", "pressure": "156", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "SportFlexアイロン接着SportFlex Iron-On", "pressure": "133", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "転写シートTransfer Sheet", "pressure": "120", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "UV活性化で色が変化するアイロン接着タイプUV Activated Color Changing Iron-On", "pressure": "113", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "お得なグリッターアイロン接着Value Glitter Iron-On", "pressure": "200", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "アイロン接着タイプ", "name": "お得なアイロン接着タイプValue Iron-On", "pressure": "113", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "カードストック、接着剤付きCardstock, Adhesive-Backed", "pressure": "300", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "カットアウェイカード + バッカーCutaway Card + Backer", "pressure": "200", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "デラックスペーパーDeluxe Paper", "pressure": "270", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "デラックスペーパー、エンボスホイルDeluxe Paper Foil Embossed", "pressure": "300", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "デラックスペーパー、粘着バックDeluxe Paper, Adhesive Backed", "pressure": "270", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "グリッターカードストックGlitter Cardstock", "pressure": "270", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "ヘビーカードストック - 100ポンド（270gsm）Heavy Cardstock - 100 lb (270 gsm)", "pressure": "310", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "パターン厚紙Heavy Patterned Paper", "pressure": "275", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "ホログラフィックカードストックHolographic Cardstock", "pressure": "275", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "カードを挿入-カードストックInsert Card - Cardstock", "pressure": "265", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "クラフトカードストックKraft Cardstock", "pressure": "275", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "ライトカードストック - 65ポンド（176gsm）Light Cardstock - 65 lb (176 gsm)", "pressure": "214", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "ミディアムカードストック - 80ポンド（216gsm）Medium Cardstock - 80 lb (216 gsm)", "pressure": "320", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "カードストック（複雑なカット用）Medium Cardstock - 80 lb (Intricate Cuts, 2x Pass)", "pressure": "200", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "Smart Paper、ステッカーカードストックSmart Paper Matless Sticker Cardstock", "pressure": "300", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "カードストック", "name": "お得なカードストック - 65 lb（176 g）Value Cardstock - 65 lb (176gsm)", "pressure": "240", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "粘着箔Adhesive Foil", "pressure": "108", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "粘着ホイル、マットAdhesive Foil, Matte", "pressure": "155", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "チョークボードビニールChalkboard Vinyl", "pressure": "210", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "ドライイレースビニールDry Erase Vinyl", "pressure": "119", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "自由自在の原紙フイルムFlexible Stencil Film", "pressure": "110", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "グリッタービニールGlitter Vinyl", "pressure": "85", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "暗闇で光るビニールGlow in the Dark Vinyl", "pressure": "165", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "熱や冷感活性化で色が変化するビニールHeat/Cold Activated Color Changing Vinyl", "pressure": "156", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "ホログラフィックビニールHolographic Vinyl", "pressure": "110", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "ビニールマットMatte Vinyl", "pressure": "121", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "メタリックビニールMetallic Vinyl", "pressure": "134", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "プレミアム屋外用ビニールPremium Outdoor Vinyl", "pressure": "118", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl - フロストグリッターPremium Vinyl - Frosted Glitter", "pressure": "148", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl -フロストグレーPremium Vinyl - Frosted Gray", "pressure": "131", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl - フロスト不透明Premium Vinyl - Frosted Opaque", "pressure": "115", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl -ホログラフィック3DテクスチャPremium Vinyl - Holographic 3D Texture", "pressure": "108", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl - ホログラフィックアールデコPremium Vinyl - Holographic Art Deco", "pressure": "138", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl - ホログラフィックバブルPremium Vinyl - Holographic Bubbles", "pressure": "128", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl - ホログラフィッククリスタルPremium Vinyl - Holographic Crystals", "pressure": "160", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "ホログラフィックローズバブルのプレミアムビニールPremium Vinyl - Holographic Rose Bubble", "pressure": "115", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "ホログラフィックスパークルビニールPremium Vinyl - Holographic Sparkle", "pressure": "139", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl -ホログラフィックスレッドPremium Vinyl - Holographic Threads", "pressure": "138", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl - モザイクPremium Vinyl - Mosaic", "pressure": "146", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl - パールPremium Vinyl - Pearl", "pressure": "156", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl - 恒久的光沢Premium Vinyl - Permanent", "pressure": "120", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl - 取り外し可能なマットPremium Vinyl - Removable", "pressure": "121", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl - シマーPremium Vinyl - Shimmer", "pressure": "148", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl - テクスチャードPremium Vinyl - Textured", "pressure": "166", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl - テクスチャードメタリックPremium Vinyl - Textured Metallic", "pressure": "166", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Premium Vinyl -トゥルーブラッシュPremium Vinyl - True Brushed", "pressure": "140", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "印刷可能なビニール、特殊Printable Vinyl, Specialty (Gold/Silver)", "pressure": "145", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "印刷可能なビニール、透明Printable Vinyl, Transparent", "pressure": "115", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "印刷可能なビニールPrintable Vinyl, White (Gray Liner Printing)", "pressure": "125", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "印刷可能なビニール、ホワイト（グリーンライナー印刷）Printable Vinyl, White (Green Liner Printing)", "pressure": "90", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "印刷可能な防水ステッカーセット - 透明Printable Waterproof Sticker Set - Transparent", "pressure": "275", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "印刷可能な防水ステッカーセット - 透明ホログラフィックPrintable Waterproof Sticker Set - Transparent Holographic", "pressure": "300", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "印刷可能な防水ステッカーセット - ホワイトPrintable Waterproof Sticker Set - White", "pressure": "235", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "印刷可能な防水ステッカーセット - ホワイトホログラフィックPrintable Waterproof Sticker Set - White Holographic", "pressure": "235", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "サンドブラストステンシルSandblast Stencil", "pressure": "190", "multicut": "2x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Smart Label書き込み可能ビニールSmart Label Matless Writable Vinyl", "pressure": "140", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "使いやすい原紙Smart Stencil Matless Flexible Stencil Film", "pressure": "110", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Smart Vinyl - 恒久Smart Vinyl Matless Permanent Vinyl", "pressure": "120", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Smart Vinyl - 取り外し可能Smart Vinyl Matless Removable Vinyl", "pressure": "106", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Smart Vinyl - マットメタリックSmart Vinyl Matte Metallic Matless Permanent Vinyl", "pressure": "134", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "Smart Vinyl - シマーSmart Vinyl Shimmer Matless Permanent Vinyl", "pressure": "154", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "ステンシルフィルム - 0.4mmStencil Film - 0.4 mm", "pressure": "300", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "ステンシルビニールStencil Vinyl", "pressure": "109", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "お得なビニールValue Vinyl", "pressure": "120", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ビニール", "name": "ビニールVinyl", "pressure": "126", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "フェルト", "name": "フェルトFelt", "pressure": "133", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "フェルト", "name": "フェルト、アクリル布Felt, Acrylic Fabric", "pressure": "1995", "multicut": "1x", "blade": "ロータリーブレード", "products": []}, {"machine": "Maker3", "category": "フェルト", "name": "フェルト、クラフト接着剤付きFelt, Craft Bonded", "pressure": "350", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "フェルト", "name": "フェルト、グリッター接着剤付きFelt, Glitter Bonded", "pressure": "350", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "フェルト", "name": "フェルト、硬めFelt, Stiff", "pressure": "250", "multicut": "2x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "フェルト", "name": "フェルト、接着剤付きウールFelt, Wool Bonded", "pressure": "350", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "フェルト", "name": "フェルト、ウール布Felt, Wool Fabric", "pressure": "350", "multicut": "6x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "フォーム", "name": "クラフトフォームCraft Foam", "pressure": "180", "multicut": "1x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "フォーム", "name": "EVAフォームEVA foam", "pressure": "145", "multicut": "1x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "フォーム", "name": "グリッタークラフトフォームGlitter Craft Foam", "pressure": "180", "multicut": "1x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "プラスチック", "name": "アセテートAcetate", "pressure": "280", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "プラスチック", "name": "カッティングマットプロテクターCutting Mat Protector", "pressure": "310", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "プラスチック", "name": "ホイルアセテートFoil Acetate", "pressure": "321", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "プラスチック", "name": "マイラーMylar", "pressure": "292", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "プラスチック", "name": "16ゲージの粘着なしビニールNon-Adhesive Vinyl - 16 gauge", "pressure": "270", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "プラスチック", "name": "20ゲージの粘着なしビニールNon-Adhesive Vinyl - 20 Gauge", "pressure": "300", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "プラスチック", "name": "屋外用ビニール、接着剤付きOutdoor Vinyl, Bonded", "pressure": "275", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "プラスチック", "name": "プラスチックパッケージPlastic Packaging", "pressure": "345", "multicut": "6x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "プラスチック", "name": "透明シートTransparency", "pressure": "308", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ホイル・金属", "name": "アルミホイルAluminum Foil", "pressure": "70", "multicut": "3x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "ホイル・金属", "name": "光沢のある側が下のホイルテープFoil Tape - Shiny Side Down", "pressure": "175", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ホイル・金属", "name": "箔押しテープ（光沢のある面が上）Foil Tape - Shiny Side Up", "pressure": "175", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ホイル・金属", "name": "パーティーホイルParty Foil", "pressure": "275", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "ホイル・金属", "name": "印刷可能な箔Printable Foil", "pressure": "293", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "ブッチャーペーパーButcher Paper", "pressure": "80", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "調整用紙Calibration Paper", "pressure": "192", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "工作用紙Construction Paper", "pressure": "168", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "コピーペーパー - 20ポンド（75gsm）Copy Paper", "pressure": "126", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "コピーペーパー - 24ポンド（90gsm）Copy Paper - 24 lb (90 gsm)", "pressure": "126", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "コピーペーパー - 32ポンド（120gsm）Copy Paper - 32 lb (120 gsm)", "pressure": "126", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "段ボール紙Corrugated Paper", "pressure": "329", "multicut": "1x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "フロックペーパーFlocked Paper", "pressure": "299", "multicut": "3x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "ホイルペーパー - 0.36mmFoil Paper - 0.36 mm", "pressure": "274", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "フリーザーペーパーFreezer Paper", "pressure": "128", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "買い物バッグGrocery Bag", "pressure": "200", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "140 Ib（300 g ）の厚い水彩紙Heavy Watercolor Paper - 140 lbs (300 gsm)", "pressure": "345", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "レーザーコピーペーパーLaser Copy Paper", "pressure": "126", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "ライトパターンペーパーLight Patterned Paper", "pressure": "152", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "ノートブックペーパーNotebook Paper", "pressure": "191", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "ペーパー、接着剤付きPaper, Adhesive-Backed", "pressure": "240", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "パーチメントペーパーParchment Paper", "pressure": "110", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "パールペーパーPearl Paper", "pressure": "138", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "フォトペーパーPhoto Paper - 48 lb", "pressure": "345", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "印刷可能なステッカーペーパー（クリア）Printable Sticker Paper, Clear (No Liner Printing)", "pressure": "230", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "印刷可能なステッカー用紙、ホワイト（グリーンライナー印刷）Printable Sticker Paper, White", "pressure": "195", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "印刷可能なステッカーペーパー（ホワイト）Printable Sticker Paper, White (Gray Liner Printing)", "pressure": "265", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "シマーペーパーShimmer Paper", "pressure": "345", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "スマート水溶性ラベルSmart Label Dissolvable Matless Writable Paper", "pressure": "80", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "滑らかなグリッターペーパーSmooth Glitter Paper", "pressure": "175", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "スパークルペーパーSparkle Paper", "pressure": "285", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "ステッカーペーパー、取り外し可能Sticker Paper, Removable", "pressure": "106", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "付箋Sticky Note", "pressure": "193", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "昇華転写紙Sublimation Paper", "pressure": "130", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "トゥルーブラッシュペーパーTrue Brushed Paper", "pressure": "330", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "ベラムVellum", "pressure": "220", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "ウォーターカラーカードWatercolor Cards", "pressure": "230", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "ワックスペーパーWax Paper", "pressure": "160", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "紙", "name": "ラッピングペーパーWrapping Paper", "pressure": "120", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "粘着シート、両面Adhesive Sheet, Double-Sided", "pressure": "325", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "カーボンファイバーCarbon Fiber", "pressure": "138", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "シリアルボックスCereal Box", "pressure": "270", "multicut": "2x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "色付きダクトテープColored Duct Tape", "pressure": "285", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "ダクトテープシートDuct Tape Sheet", "pressure": "122", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "ジェルシートGel Sheet", "pressure": "335", "multicut": "4x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "グリッターダクトテープGlitter Duct Tape", "pressure": "285", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "マグネットシート - 0.5mmMagnetic Sheet - 0.5 mm", "pressure": "320", "multicut": "4x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "マグネットシート - 1.0mmMagnetic Sheet - 1.0 mm", "pressure": "350", "multicut": "7x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "ペイントチップPaint Chip", "pressure": "310", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "印刷可能なマグネットシートPrintable Magnetic Sheet", "pressure": "330", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "転写箔Transfer Foil", "pressure": "100", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "和紙シートWashi Sheet", "pressure": "85", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "和紙テープ - 0.06mmWashi Tape - 0.06 mm", "pressure": "70", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "その他", "name": "ウィンドウクリングWindow Cling", "pressure": "100", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "革", "name": "純正レザーGenuine Leather", "pressure": "270", "multicut": "2x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "革", "name": "４から５ozの中間の厚さのガーメントレザ－。(1.6 mm)Medium Garment Leather - 4-5 oz. (1.6 mm)", "pressure": "200", "multicut": "6x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "革", "name": "メタリックレザーMetallic Leather", "pressure": "335", "multicut": "4x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "革", "name": "シマーレザー - 1mmShimmer Leather - 1 mm", "pressure": "325", "multicut": "3x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "革", "name": "２から３ozの薄手のガーメントレザー。(0.8から1.3 mm)Thin Garment Leather - 2-3 oz. (0.8-1.3 mm)", "pressure": "180", "multicut": "3x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "革", "name": "ツーリングレザー - 2～3オンス（0.8mm）Tooling Leather - 2-3 oz. (0.8 mm)", "pressure": "287", "multicut": "3x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "革", "name": "ツーリングレザー - 4〜5オンス（1.6mm）Tooling Leather - 4-5 oz. (1.6 mm)", "pressure": "345", "multicut": "7x", "blade": "ディープポイントブレード", "products": []}, {"machine": "Maker3", "category": "革", "name": "ツーリングレザー - 6〜7オンス（2.4mm）Tooling Leather - 6-7 oz. (2.4 mm)", "pressure": "450", "multicut": "16x", "blade": "ナイフブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "竹布Bamboo Fabric", "pressure": "1500", "multicut": "1x", "blade": "ロータリーブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "コットンCotton", "pressure": "1900", "multicut": "1x", "blade": "ロータリーブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "コットン、接着剤付きCotton, Bonded", "pressure": "286", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "デニムDenim", "pressure": "2550", "multicut": "1x", "blade": "ロータリーブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "デニム、接着剤付きDenim, Bonded", "pressure": "340", "multicut": "3x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "フェイクレザー（超薄）Faux Leather (Paper Thin)", "pressure": "215", "multicut": "2x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "合成スエードFaux Suede", "pressure": "1900", "multicut": "1x", "blade": "ロータリーブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "フランネルFlannel", "pressure": "1950", "multicut": "1x", "blade": "ロータリーブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "フリースFleece", "pressure": "1950", "multicut": "1x", "blade": "ロータリーブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "フュージブル布Fusible Fabric", "pressure": "220", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "リネンLinen", "pressure": "2148", "multicut": "1x", "blade": "ロータリーブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "リネン、接着剤付きLinen, Bonded", "pressure": "225", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "ポリエステルPolyester", "pressure": "1600", "multicut": "1x", "blade": "ロータリーブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "ポリエステル、接着剤付きPolyester, Bonded", "pressure": "285", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "印刷可能な布Printable Fabric", "pressure": "189", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "布", "name": "シルク、接着剤付きSilk, Bonded", "pressure": "175", "multicut": "1x", "blade": "ファインポイントブレード", "products": []}, {"machine": "Maker3", "category": "木材", "name": "バルサ - 1／16インチ（1.6mm）Balsa - 1/16\" (1.6 mm)", "pressure": "200", "multicut": "4x", "blade": "ナイフブレード", "products": []}, {"machine": "Maker3", "category": "木材", "name": "バルサ - 3／32インチ（2.4mm）Balsa - 3/32\" (2.4 mm)", "pressure": "300", "multicut": "7x", "blade": "ナイフブレード", "products": []}, {"machine": "Maker3", "category": "木材", "name": "バスウッド - 1／16インチ（1.6mm）Basswood - 1/16\" (1.6 mm)", "pressure": "750", "multicut": "14x", "blade": "ナイフブレード", "products": []}, {"machine": "Maker3", "category": "木材", "name": "ナチュラルウッドベニヤNatural Wood Veneer", "pressure": "345", "multicut": "4x", "blade": "ディープポイントブレード", "products": []}];
+
+// ===== ユーザーDB =====
+const STORAGE_KEY = 'cricut_mydb_v2';
+const CAT_COLOR = {
+  'アートボード':'#6BB379','アイロン接着タイプ':'#8AE6D6','カードストック':'#8ED17D',
+  'ビニール':'#91E2F2','プラスチック':'#D88DEB','ホイル・金属':'#82B9D9',
+  '布':'#FFA299','紙':'#C1E68A','その他':'#FFC559',
+  'フェルト':'#E6A88A','フォーム':'#FF99EE','革':'#CCA37A','木材':'#C9A86C'
+};
+const MACHINES = ['Joy','Explorer3','Maker3','all'];
+
+function catColor(c){ return CAT_COLOR[c]||'#B2E0DB'; }
+function catTextColor(hex){ const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return (r*299+g*587+b*114)/1000>160?'#3A4A3F':'#FFFFFF'; }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+let db = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+let editId = null, selectedLevel = '';
+let currentMachine = 'Joy', currentCat = 'all', currentBlade = 'all', currentSort = 'none';
+
+if(db.length === 0){
+  db = [
+    {id:uid(),machine:'Joy',category:'ビニール',name:'ダイソー ラメ入りビニールシール',official:'Premium Vinyl - シマー / Premium Vinyl - Shimmer',officialPressure:'140',pressure:140,blade:'ファインポイントブレード',level:'デフォルト',memo:'転写シート使用。ラメが引っかかりやすいので速度注意'},
+    {id:uid(),machine:'Maker3',category:'フェルト',name:'セリア フェルト（2mm厚）',official:'フェルト、クラフト接着剤付きFelt, Craft Bonded',officialPressure:'350',pressure:350,blade:'ファインポイントブレード',level:'詳細',memo:'FabricGripマット使用。裏面を上にして置く'},
+    {id:uid(),machine:'Joy',category:'紙',name:'ダイソー カラー画用紙',official:'レーザーコピーペーパー / Laser Copy Paper',officialPressure:'100',pressure:95,blade:'ファインポイントブレード',level:'少',memo:'薄め。LightGripマット使用'},
+  ];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+}
+
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
+
+// === フォーム連動 ===
+function onMachineChange(){
+  const m = document.getElementById('f_machine').value;
+  const sel = document.getElementById('f_official');
+  sel.innerHTML = '<option value="">— 選択してください（任意）—</option>';
+  document.getElementById('official_pressure').textContent = '—';
+  document.getElementById('official_pressure').className = 'pressure-auto';
+  document.getElementById('autofill-note').style.display = 'none';
+  if(!m) return;
+  const filtered = OFFICIAL_DATA.filter(d => d.machine === m);
+  // カテゴリでグループ化
+  const groups = {};
+  filtered.forEach(d => {
+    if(!groups[d.category]) groups[d.category] = [];
+    groups[d.category].push(d);
+  });
+  Object.keys(groups).sort((a,b)=>a.localeCompare(b,'ja')).forEach(cat => {
+    const og = document.createElement('optgroup');
+    og.label = cat;
+    groups[cat].forEach(d => {
+      const op = document.createElement('option');
+      op.value = d.name;
+      op.dataset.pressure = d.pressure;
+      op.dataset.blade = d.blade && d.blade !== '-' ? d.blade : '';
+      op.dataset.multicut = d.multicut;
+      op.textContent = trimOfficialName(d.name);
+      og.appendChild(op);
+    });
+    sel.appendChild(og);
+  });
+}
+
+// 公式素材名から / 以降を削除（ない場合はそのまま）
+function trimOfficialName(name){
+  if(!name) return '';
+  const slashIdx = name.search(/\s*\//);
+  if(slashIdx !== -1) return name.slice(0, slashIdx).trim();
+  return name.trim();
+}
+
+// ブレード→マット自動判定
+function autoMat(blade, category){
+  if(!blade && !category) return '';
+  if(category === '紙' || category === 'カードストック') return 'LightGrip（水色）';
+  if(blade === 'ロータリーブレード') return 'FabricGrip（ピンク）';
+  if(blade === 'ナイフブレード') return 'StrongGrip（紫）';
+  return 'StandardGrip（緑）';
+}
+
+function onOfficialChange(){
+  const sel = document.getElementById('f_official');
+  const opt = sel.options[sel.selectedIndex];
+  if(!opt || !opt.value){ 
+    document.getElementById('official_pressure').textContent = '—';
+    document.getElementById('official_pressure').className = 'pressure-auto';
+    document.getElementById('autofill-note').style.display = 'none';
+    return;
+  }
+  const p = opt.dataset.pressure;
+  const b = opt.dataset.blade;
+  // 公式圧力表示
+  document.getElementById('official_pressure').textContent = p ? `${p}（カット回数: ${opt.dataset.multicut}）` : '—';
+  document.getElementById('official_pressure').className = 'pressure-auto' + (p ? ' filled' : '');
+  // マイ圧力欄に自動入力
+  if(p) document.getElementById('f_pressure').value = p;
+  // ブレード自動入力（disabled維持したまま値だけセット）
+  const bladeEl = document.getElementById('f_blade');
+  if(b){ bladeEl.value = b; } else { bladeEl.value = ''; }
+  document.getElementById('autofill-note').style.display = p ? 'block' : 'none';
+}
+
+function selectLevel(v){
+  selectedLevel = v;
+  document.querySelectorAll('#levelBtns .level-btn').forEach(btn => {
+    btn.className = 'level-btn' + (btn.dataset.val === v ? ' sel-'+v : '');
+  });
+}
+
+// === 画面フィルター ===
+function setMachine(m){
+  currentMachine = m; currentCat = 'all'; currentBlade = 'all';
+  document.querySelectorAll('.machine-btn').forEach((btn,i) => btn.classList.toggle('active', MACHINES[i] === m));
+  buildChips(); buildBladeChips(); render();
+}
+function getCategories(){ const s = currentMachine==='all'?db:db.filter(d=>d.machine===currentMachine); const c=[...new Set(s.map(d=>d.category))].sort((a,b)=>a.localeCompare(b,'ja')); return ['all',...c]; }
+function getBlades(){ const s = currentMachine==='all'?db:db.filter(d=>d.machine===currentMachine); const b=[...new Set(s.map(d=>d.blade).filter(v=>v))].sort((a,b)=>a.localeCompare(b,'ja')); return ['all',...b]; }
+function buildChips(){ document.getElementById('chips').innerHTML = getCategories().map(c=>`<button class="chip${c===currentCat?' active':''}" onclick="setCat('${c}')">${c==='all'?'全カテゴリ':c}</button>`).join(''); }
+function buildBladeChips(){ document.getElementById('blade-chips').innerHTML = getBlades().map(b=>`<button class="blade-chip${b===currentBlade?' active':''}" onclick="setBlade('${b}')">${b==='all'?'全て':b}</button>`).join(''); }
+function setCat(c){ currentCat=c; buildChips(); render(); }
+function setBlade(b){ currentBlade=b; buildBladeChips(); render(); }
+function setSort(s){
+  currentSort=s;
+  ['sort-none','sort-thick-asc','sort-thick-desc'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.classList.remove('active');
+  });
+  const activeId = s==='none'?'sort-none':s==='thick-asc'?'sort-thick-asc':'sort-thick-desc';
+  const el=document.getElementById(activeId); if(el) el.classList.add('active');
+  render();
+}
+function clearThick(){
+  document.getElementById('thick-min').value='';
+  document.getElementById('thick-max').value='';
+  render();
+}
+
+function getFiltered(){
+  const q = document.getElementById('search').value.toLowerCase();
+  const thickMin = parseFloat(document.getElementById('thick-min')?.value);
+  const thickMax = parseFloat(document.getElementById('thick-max')?.value);
+  return db.filter(r=>{
+    const mOk = currentMachine==='all'||r.machine===currentMachine;
+    const cOk = currentCat==='all'||r.category===currentCat;
+    const bOk = currentBlade==='all'||r.blade===currentBlade;
+    const sOk = !q||r.name.toLowerCase().includes(q)||(r.official||'').toLowerCase().includes(q)||(r.memo||'').toLowerCase().includes(q);
+    const t = parseFloat(r.thickness);
+    const tMinOk = isNaN(thickMin) || (!isNaN(t) && t >= thickMin);
+    const tMaxOk = isNaN(thickMax) || (!isNaN(t) && t <= thickMax);
+    return mOk&&cOk&&bOk&&sOk&&tMinOk&&tMaxOk;
+  }).sort((a,b)=>{
+    if(currentSort==='thick-asc'){
+      const ta=parseFloat(a.thickness), tb=parseFloat(b.thickness);
+      if(isNaN(ta)&&isNaN(tb)) return 0;
+      if(isNaN(ta)) return 1;
+      if(isNaN(tb)) return -1;
+      return ta-tb;
+    }
+    if(currentSort==='thick-desc'){
+      const ta=parseFloat(a.thickness), tb=parseFloat(b.thickness);
+      if(isNaN(ta)&&isNaN(tb)) return 0;
+      if(isNaN(ta)) return 1;
+      if(isNaN(tb)) return -1;
+      return tb-ta;
+    }
+    return 0;
+  });
+}
+
+function render(){
+  const rows = getFiltered();
+  const total=db.length, ms=[...new Set(db.map(r=>r.machine))].length, cs=[...new Set(db.map(r=>r.category))].length;
+  document.getElementById('statsBar').innerHTML=`<span>登録数: ${total}件</span><span>マシン: ${ms}種</span><span>カテゴリ: ${cs}種</span><span>表示: ${rows.length}件</span>`;
+  document.getElementById('result-count').textContent=`${rows.length}件 表示中`;
+
+  if(!rows.length){
+    document.getElementById('cards').innerHTML=`<div class="empty"><div class="emoji">🔍</div>該当データなし<br><span style="font-size:12px;margin-top:8px;display:block">「＋ 追加」ボタンで登録しましょう</span></div>`;
+    return;
+  }
+  document.getElementById('cards').innerHTML = rows.map(r=>{
+    const mTag = currentMachine==='all'?`<span style="font-size:10px;color:var(--text-light);margin-left:4px">[${r.machine}]</span>`:'';
+    const officialDisplay = trimOfficialName(r.official||'');
+    const officialLine = officialDisplay?`<div class="card-official">📌 公式類似: <span style="color:${catColor(r.category)};filter:brightness(0.75);font-weight:700">${esc(officialDisplay)}</span></div>`:'';
+    const levelBadge = r.level?`<span class="level-badge level-${r.level}">${r.level}</span>`:'';
+    const matClass = r.mat?.includes('Lite')||r.mat?.includes('Light') ? 'mat-lite' : r.mat?.includes('Fabric') ? 'mat-fabric' : r.mat?.includes('Strong') ? 'mat-strong' : r.mat ? 'mat-standard' : '';
+    const matBadge = r.mat ? `<span class="mat-badge ${matClass}">${esc(r.mat)}</span>` : '';
+    const thickLine = r.thickness!=null&&r.thickness!==''&&r.thickness!==undefined ? `<div style="font-size:11px;color:var(--text-light);margin-top:3px">📏 厚み: ${r.thickness}mm</div>` : '';
+    const memoLine = r.memo?`<div class="card-memo"><div class="memo-label">💬 メモ</div>${esc(r.memo)}</div>`:'';
+    return `<div class="card" style="border-left-color:${catColor(r.category)}">
+      <div class="card-header">
+        <div class="card-names">
+          <div class="card-name">${esc(r.name)}${mTag}</div>
+          ${officialLine}
+          ${thickLine}
+        </div>
+        <span class="card-cat" style="background:${catColor(r.category)};color:${catTextColor(catColor(r.category))}">${esc(r.category)}</span>
+      </div>
+      <div class="card-specs">
+        ${r.officialPressure?`<div class="spec"><span class="spec-label">公式圧力</span><span class="spec-value" style="color:var(--text-light);font-size:12px">${r.officialPressure}</span></div>`:''}
+        <div class="spec"><span class="spec-label">マイ圧力</span><span class="spec-value">${r.pressure||'—'}</span></div>
+        ${r.blade?`<div class="spec"><span class="spec-label">ブレード</span><span class="spec-value" style="font-size:10px">${esc(r.blade)}</span></div>`:''}
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+        ${levelBadge}
+        ${matBadge}
+      </div>
+      ${memoLine}
+      <div class="card-actions">
+        <button class="btn-edit" onclick="openEdit('${r.id}')">✏️ 編集</button>
+        <button class="btn-del" onclick="deleteEntry('${r.id}')">🗑 削除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// === モーダル ===
+function openModal(id=null){
+  editId = id;
+  const r = id ? db.find(x=>x.id===id) : null;
+  document.getElementById('modalTitle').textContent = id?'✏️ カット設定を編集':'✏️ カット設定を追加';
+  document.getElementById('f_machine').value = r?.machine||'';
+  document.getElementById('f_category').value = r?.category||'';
+  document.getElementById('f_name').value = r?.name||'';
+  document.getElementById('f_pressure').value = r?.pressure||'';
+  const bladeEl = document.getElementById('f_blade');
+  bladeEl.value = r?.blade||'';
+  document.getElementById('f_thickness').value = r?.thickness||'';
+  document.getElementById('f_mat').value = r?.mat||'';
+  document.getElementById('f_memo').value = r?.memo||'';
+  selectedLevel = r?.level||'';
+  document.querySelectorAll('#levelBtns .level-btn').forEach(btn=>{
+    btn.className='level-btn'+(btn.dataset.val===selectedLevel?' sel-'+selectedLevel:'');
+  });
+  // マシン連動プルダウン構築
+  onMachineChange();
+  // 編集時は公式素材を選択状態に
+  if(r?.official){
+    const sel = document.getElementById('f_official');
+    for(let i=0;i<sel.options.length;i++){
+      if(sel.options[i].value===r.official){ sel.selectedIndex=i; break; }
+    }
+    document.getElementById('official_pressure').textContent = r.officialPressure ? `${r.officialPressure}` : '—';
+    document.getElementById('official_pressure').className = 'pressure-auto'+(r.officialPressure?' filled':'');
+  }
+  document.getElementById('overlay').classList.add('open');
+}
+function openEdit(id){ openModal(id); }
+function closeModal(){ document.getElementById('overlay').classList.remove('open'); editId=null; }
+function closeOut(e){ if(e.target.id==='overlay') closeModal(); }
+
+function saveEntry(){
+  const machine=document.getElementById('f_machine').value;
+  const category=document.getElementById('f_category').value;
+  const name=document.getElementById('f_name').value.trim();
+  if(!machine||!category||!name){ notify('⚠️ マシン・カテゴリ・素材名は必須です'); return; }
+  const sel=document.getElementById('f_official');
+  const opt=sel.options[sel.selectedIndex];
+  const entry={
+    id: editId||uid(), machine, category, name,
+    official: opt?.value||'',
+    officialPressure: opt?.dataset?.pressure||'',
+    pressure: parseFloat(document.getElementById('f_pressure').value)||null,
+    thickness: parseFloat(document.getElementById('f_thickness').value)||null,
+    blade: document.getElementById('f_blade').value,
+    mat: document.getElementById('f_mat').value,
+    level: selectedLevel,
+    memo: document.getElementById('f_memo').value.trim(),
+  };
+  if(editId){ db[db.findIndex(x=>x.id===editId)]=entry; notify('✅ 更新しました'); }
+  else { db.unshift(entry); notify('✅ 登録しました'); }
+  save(); closeModal(); buildChips(); buildBladeChips(); render();
+}
+
+function deleteEntry(id){
+  if(!confirm('このデータを削除しますか？')) return;
+  db=db.filter(x=>x.id!==id); save(); buildChips(); buildBladeChips(); render(); notify('🗑️ 削除しました');
+}
+
+function exportCSV(){
+  const rows=getFiltered();
+  const h=['素材名','マシン','カテゴリ','公式類似素材名','公式圧力','マイ圧力','素材の厚み','ブレード','使用マット','圧力レベル','メモ'];
+  const csv=[h.join(','),...rows.map(r=>[r.name,r.machine,r.category,trimOfficialName(r.official||''),r.officialPressure||'',r.pressure||'',r.thickness||'',r.blade||'',r.mat||'',r.level||'',(r.memo||'').replace(/,/g,'；')].map(v=>`"${v}"`).join(','))].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download='cricut_mydb.csv'; a.click(); notify('📥 CSV出力しました');
+}
+
+let nt;
+function notify(msg){ const e=document.getElementById('notif'); e.textContent=msg; e.classList.add('show'); clearTimeout(nt); nt=setTimeout(()=>e.classList.remove('show'),2500); }
+
+buildChips(); buildBladeChips(); render();
+</script>
+</body>
+</html>
